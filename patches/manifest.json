@@ -1,0 +1,28 @@
+{
+  "schema": "agent-toolbench-patches-v1",
+  "repository": "https://github.com/puntastic/CodexPersonal",
+  "base_commit": "fff6b3c94035a3386b981dcaa63f8e3564943e78",
+  "source_commit": "af45068bd4299f481fbd77f60131b2b2d8d5641c",
+  "source_commit_state": "Local source checkpoint at export; the patch files carry the selected changes without requiring that commit to be remotely available.",
+  "application_check": "Both patches independently passed git apply --check against the clean named base. No patch was applied to the baseline checkout.",
+  "patches": [
+    {
+      "file": "01-native-argv-and-shell-resolution.patch",
+      "sha256": "7ce3f0e590263fffbf9d95ab77ede32852faca2f3554e6d9214704c7aa363df5",
+      "changed_files": 29,
+      "scope": "Native argv, shell resolution, related execution tests and tool-context snapshots."
+    },
+    {
+      "file": "02-mailbox-history-mode-tests.patch",
+      "sha256": "8486071ad79f76a5834428a399de1ab536ebdb10cfd80dcca9082dd0814f5f45",
+      "changed_files": 1,
+      "scope": "Ancillary mailbox test-mode correction only."
+    }
+  ],
+  "excluded_from_export": [
+    "Local build/deployment state",
+    "Credentials, binaries, and full transcripts",
+    "Workstation-specific maintenance diary"
+  ],
+  "runtime_status": "Source-qualified candidate. Export does not establish installation or live Desktop tool exposure."
+}

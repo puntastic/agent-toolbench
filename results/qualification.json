@@ -1,0 +1,108 @@
+{
+  "schema": "agent-toolbench-qualification-v1",
+  "recorded_date": "2026-10-05",
+  "scope": "Local source checks, synthetic integration tests, and reviewed snapshots; not live-model performance evidence.",
+  "source_base": "fff6b3c94035a3386b981dcaa63f8e3564943e78",
+  "final_source_checkpoint": "af45068bd4299f481fbd77f60131b2b2d8d5641c",
+  "runs": [
+    {
+      "artifact": "core-full.junit.xml",
+      "sha256": "2744b3e48322fe43a453fc4323cfedf74e5184c9141603c4cb169124d4c38929",
+      "tests": 4154,
+      "failures": 204,
+      "passed": 3950,
+      "failed_tests": [
+        "guardian::tests::guardian_reuses_prompt_cache_key_and_appends_prior_reviews",
+        "guardian::tests::guardian_review_request_layout_matches_model_visible_request_snapshot",
+        "session::tests::stale_defer_mailbox_delivery_does_not_override_steered_input",
+        "session::tests::steered_input_reopens_mailbox_delivery_for_current_turn",
+        "suite::app_tool_exposure::connector_omissions_preserve_direct_only_namespace",
+        "suite::app_tool_exposure::connector_omissions_respect_server_restrictions::server_excludes_direct",
+        "suite::app_tool_exposure::connector_omissions_respect_server_restrictions::server_excludes_exec",
+        "suite::app_tool_exposure::connector_omissions_respect_server_restrictions::unconfigured",
+        "suite::app_tool_exposure::non_deferred_connector_exposure_and_dispatch::code_mode",
+        "suite::app_tool_exposure::non_deferred_connector_exposure_and_dispatch::code_mode_only",
+        "suite::app_tool_exposure::non_deferred_connector_exposure_and_dispatch::direct",
+        "suite::cli_stream::exec_cli_applies_model_instructions_file",
+        "suite::cli_stream::exec_cli_profile_applies_model_instructions_file",
+        "suite::cli_stream::integration_creates_and_checks_session_file",
+        "suite::cli_stream::responses_api_stream_cli",
+        "suite::cli_stream::responses_mode_stream_cli",
+        "suite::cli_stream::responses_mode_stream_cli_does_not_attempt_oauth_refresh_for_personal_access_tokens_after_401",
+        "suite::cli_stream::responses_mode_stream_cli_supports_openai_base_url_config_override",
+        "suite::cli_stream::responses_mode_stream_cli_supports_personal_access_tokens",
+        "suite::code_mode::app_only_tools_are_not_visible_or_runnable_by_code_mode_model"
+      ],
+      "omitted_failed_test_names": 184,
+      "phase": "initial core run with missing prerequisites"
+    },
+    {
+      "artifact": "core-prerequisites-fixed.junit.xml",
+      "sha256": "e2a2a89e2c5dee90d676da9ad25d2b67f577f1f729a2160effb1b26c54f03a8d",
+      "tests": 4151,
+      "failures": 16,
+      "passed": 4135,
+      "failed_tests": [
+        "guardian::tests::guardian_reuses_prompt_cache_key_and_appends_prior_reviews",
+        "guardian::tests::guardian_review_request_layout_matches_model_visible_request_snapshot",
+        "session::tests::stale_defer_mailbox_delivery_does_not_override_steered_input",
+        "session::tests::steered_input_reopens_mailbox_delivery_for_current_turn",
+        "suite::scenarios::app_tool_exposure_request_history",
+        "suite::scenarios::astra_asks_an_async_question_and_receives_the_answer_while_working",
+        "suite::scenarios::astra_kickoff_with_skills_plugins_and_remote_compaction",
+        "suite::scenarios::astra_omits_disabled_executor_skills_from_model_context",
+        "suite::scenarios::astra_reads_code_mode_call_timing",
+        "suite::scenarios::astra_switches_environments_for_the_rest_of_the_active_turn",
+        "suite::scenarios::astra_refreshes_plugin_tools_and_skills_in_an_existing_thread",
+        "suite::scenarios::code_mode_catalog_messages",
+        "suite::scenarios::guardian_extra_policy::extra_policy_reaches_guardian_review",
+        "suite::scenarios::guardian_checkpoint_migration_request_history",
+        "suite::scenarios::multi_agent_catalog_parameters",
+        "suite::scenarios::subagent_browser_auth_resolves_user_prompt"
+      ],
+      "omitted_failed_test_names": 0,
+      "phase": "core run with prerequisites and machine-provisioning group excluded"
+    },
+    {
+      "artifact": "baseline-mailbox.junit.xml",
+      "sha256": "30d1dc517a7acd47ae9e71e6b3c5ccc12b22725c55ce03e43de9477999619b0c",
+      "tests": 2,
+      "failures": 2,
+      "passed": 0,
+      "failed_tests": [
+        "session::tests::steered_input_reopens_mailbox_delivery_for_current_turn",
+        "session::tests::stale_defer_mailbox_delivery_does_not_override_steered_input"
+      ],
+      "omitted_failed_test_names": 0,
+      "phase": "untouched baseline discriminator for two mailbox expectations"
+    },
+    {
+      "artifact": "focused-final-preformat.junit.xml",
+      "sha256": "34af5c2c4ce9fdc0cfddce87462e9e83c5818ec9eff71ce2314b143d5155c1ef",
+      "tests": 346,
+      "failures": 0,
+      "passed": 346,
+      "failed_tests": [],
+      "omitted_failed_test_names": 0,
+      "phase": "post-snapshot focused command/shell/scenario run"
+    },
+    {
+      "artifact": "mailbox-modes-final.junit.xml",
+      "sha256": "232a88733bbbbf98ba5123b029d45244cadcc91648e90deed389794be0de94d2",
+      "tests": 40,
+      "failures": 0,
+      "passed": 40,
+      "failed_tests": [],
+      "omitted_failed_test_names": 0,
+      "phase": "mailbox repair and related mode/input checks"
+    }
+  ],
+  "limits": [
+    "Runs overlap and counts must not be added as independent evidence.",
+    "Six machine-provisioning Windows sandbox integration tests were excluded from the second broad run; 83 tests in total were excluded by selection.",
+    "The whole repository workspace suite was not run.",
+    "Tests preceded final Clippy/rustfmt/format.py as required by the source repository; no post-format full suite is claimed.",
+    "The mailbox repair changes test fixtures, not production messaging or live Guardian settings.",
+    "Raw JUnit artifacts are retained locally; this published summary omits diagnostics and local paths."
+  ]
+}

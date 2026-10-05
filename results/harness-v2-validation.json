@@ -1,0 +1,1086 @@
+{
+  "schema": "tool-interface-probe-v2",
+  "source_sha256": "1b82b0ad90d372e9112d11ae20e4e630a9f9c41bba988c412595a7da76e7d741",
+  "codex_sha256": "543441200cc333639486dce09fa1f6926584fdf9ff2aeeb04c4e834c132cdde0",
+  "source_sha256_start": "1b82b0ad90d372e9112d11ae20e4e630a9f9c41bba988c412595a7da76e7d741",
+  "source_hashes_match": true,
+  "selected_arms": [
+    "direct",
+    "powershell",
+    "powershell-utf8",
+    "bash",
+    "bash-literal",
+    "nu"
+  ],
+  "scope": "Deterministic native-RPC transport fixtures; not model-generation, live-adoption, or general performance evidence.",
+  "publication": {
+    "projection_version": 1,
+    "label": "public-v2-packaged-candidate",
+    "source_record_sha256": "40f4f37ac0bae3e0d319bba5fa937af11cd0dc202e45615413a89957b567e8c1",
+    "omitted": [
+      "launch commands",
+      "startup descriptor",
+      "free-form diagnostics"
+    ],
+    "boundary": "Selected field removal, not a general privacy guarantee or proof of execution."
+  },
+  "results": [
+    {
+      "arm": "direct",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.125,
+      "stdout": {
+        "bytes": 149,
+        "sha256": "f280310623f69730267df6c4a0c0345d45cf3ce28dd4aeb684feebd654353984"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.10999999986961484,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.10899999993853271,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.11000000010244548,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.13999999989755452,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.11000000010244548,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.10899999993853271,
+      "stdout": {
+        "bytes": 82,
+        "sha256": "92f0d9946800ae4b0c4cb89315c9a5b0173701347731575a4fb22d5a19697334"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "direct",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5940000000409782,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.46800000010989606,
+      "stdout": {
+        "bytes": 149,
+        "sha256": "f280310623f69730267df6c4a0c0345d45cf3ce28dd4aeb684feebd654353984"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.48499999986961484,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.48499999986961484,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.4690000000409782,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5779999999795109,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5150000001303852,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5629999998491257,
+      "stdout": {
+        "bytes": 60,
+        "sha256": "bac0a3a97048adf9a6cf47d89dad92ce1102c2c5f73bb37e3593350cb9361a6e"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": false,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": false,
+      "payload_parse_error_present": true
+    },
+    {
+      "arm": "powershell",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 1.077999999979511,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5160000000614673,
+      "stdout": {
+        "bytes": 149,
+        "sha256": "f280310623f69730267df6c4a0c0345d45cf3ce28dd4aeb684feebd654353984"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.5149999998975545,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.4690000000409782,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.4839999999385327,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.48400000017136335,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.6099999998696148,
+      "stdout": {
+        "bytes": 65,
+        "sha256": "1549dd6927e9ac05ce360643b35c72379c6365004ced69d88a903f9af52bdfbe"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "powershell-utf8",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 1.0150000001303852,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.17199999978765845,
+      "stdout": {
+        "bytes": 169,
+        "sha256": "bfffef8c8503036f440d4a53cc7cbfe44fe9254bda59784f2def0d081e2825ce"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": false,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": false
+    },
+    {
+      "arm": "bash",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.15600000019185245,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.15699999989010394,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.15699999989010394,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1869999999180436,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.15600000019185245,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1559999999590218,
+      "stdout": {
+        "bytes": 82,
+        "sha256": "92f0d9946800ae4b0c4cb89315c9a5b0173701347731575a4fb22d5a19697334"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 0.7970000000204891,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1720000000204891,
+      "stdout": {
+        "bytes": 149,
+        "sha256": "f280310623f69730267df6c4a0c0345d45cf3ce28dd4aeb684feebd654353984"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.1720000000204891,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1559999999590218,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.15600000019185245,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.18799999984912574,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1720000000204891,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1559999999590218,
+      "stdout": {
+        "bytes": 82,
+        "sha256": "92f0d9946800ae4b0c4cb89315c9a5b0173701347731575a4fb22d5a19697334"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "bash-literal",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 0.7340000001713634,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "argv",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1410000000614673,
+      "stdout": {
+        "bytes": 149,
+        "sha256": "f280310623f69730267df6c4a0c0345d45cf3ce28dd4aeb684feebd654353984"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "json-error",
+      "exit_code": 7,
+      "elapsed_seconds": 0.13999999989755452,
+      "stdout": {
+        "bytes": 34,
+        "sha256": "42fab1999f02a53c74c897ead27e3bdb8ef105b99f9994a9bfc870e44048e94c"
+      },
+      "stderr": {
+        "bytes": 17,
+        "sha256": "93c09376a04bca72a4bdabfaa68a59b6afb54252560acfa40d3fdfdb43913196"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "bad-json",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1410000000614673,
+      "stdout": {
+        "bytes": 10,
+        "sha256": "a2e359f46a34d3de00514f2065375c5929cf7f2d546f53b255a46b22ddd2857c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "bytes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.14000000013038516,
+      "stdout": {
+        "bytes": 2048,
+        "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+      },
+      "stderr": {
+        "bytes": 9,
+        "sha256": "d5ced0067bfc2a3d600c1e24d9ece275fab9cb4759871c9844b78680b87a5fb4"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "flood",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1720000000204891,
+      "stdout": {
+        "bytes": 262144,
+        "sha256": "4480ce8e19e155ff39079e3379eafd8f369c739e24931ddc684994c2cd12ca91"
+      },
+      "stderr": {
+        "bytes": 262144,
+        "sha256": "caf546901c2a1966d4530a5a6d0323691f474ee2d6b44286799c440458c7b77f"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "stdin",
+      "exit_code": 0,
+      "elapsed_seconds": 0.15699999989010394,
+      "stdout": {
+        "bytes": 20,
+        "sha256": "7bfb8a08bb740cc252ce0e38a25aa70636cf83dd4ec784c7c6530093c12e7205"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "json-view",
+      "exit_code": 0,
+      "elapsed_seconds": 0.030999999959021807,
+      "stdout": {
+        "bytes": 64,
+        "sha256": "fe77fdf4993c92dfa3b2187cbea25cf37c82c620d021ed29ce98140d6bbf53c8"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    },
+    {
+      "arm": "nu",
+      "case": "windows",
+      "exit_code": 0,
+      "elapsed_seconds": 0.6099999998696148,
+      "stdout": {
+        "bytes": 56,
+        "sha256": "d813a8e6fb2f33dbb8745e4a7fef3463681ebdd3051bb8dcf07b70ad99f76722"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "capped": false,
+      "checks": {
+        "exit": true,
+        "stdout": true,
+        "stderr": true,
+        "complete": true
+      },
+      "passed": true
+    }
+  ]
+}

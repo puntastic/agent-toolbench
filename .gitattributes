@@ -1,0 +1,7 @@
+* text=auto
+*.md text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+# Unified diffs contain intentional space-only context lines; preserve their bytes.
+*.patch -text -whitespace
+provenance/recorded_probe.py -text

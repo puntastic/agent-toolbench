@@ -1,0 +1,14 @@
+Agent Toolbench
+Copyright 2026 Agent Toolbench contributors
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+The Codex patch files contain modifications to code from openai/codex and
+puntastic/CodexPersonal. Original Codex code is Copyright OpenAI and is
+distributed under the Apache License, Version 2.0. Preserve the applicable
+upstream license and notices when using those patches.
+The target project's original notice is retained in provenance/CODEX-NOTICE.txt.
+
+PowerShell, Git for Windows, Nushell, Python, and Codex executables are not
+redistributed here. They remain separately obtained software with their own
+licenses. Their names identify tested software, not endorsement.

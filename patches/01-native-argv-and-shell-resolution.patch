@@ -1,0 +1,1412 @@
+diff --git a/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_followup_review_request_layout.snap b/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_followup_review_request_layout.snap
+index e958eed80..957003b07 100644
+--- a/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_followup_review_request_layout.snap
++++ b/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_followup_review_request_layout.snap
+@@ -1,14 +1,14 @@
+ ---
+ source: core/src/guardian/tests.rs
+-assertion_line: 2941
++assertion_line: 2943
+ expression: "format!(\"{}\\n\\nshared_prompt_cache_key: {}\\nfollowup_contains_first_rationale: {}\",\nnormalize_guardian_snapshot_paths(format_guardian_requests_snapshot(\"Guardian follow-up review request layout\",\n&[(\"Initial Guardian Review Request\", &requests[0]),\n(\"Follow-up Guardian Review Request\", &requests[1]),],)),\nfirst_body[\"prompt_cache_key\"] == second_body[\"prompt_cache_key\"],\nsecond_body.to_string().contains(first_rationale),)"
+ ---
+ Scenario: Guardian follow-up review request layout
+ 
+ ## Window 1
+ -- request 1 (request; Initial Guardian Review Request) --
+-00:additional_tools/developer (1; hash=ae2f2f1f9dcd0cd9):
+-        - namespace/functions; hash=fd8638eaf7cabb95
++00:additional_tools/developer (1; hash=808f948a6f51887e):
++        - namespace/functions; hash=d814cc2904cd1f70
+           - custom/exec
+           - function/wait
+ 01:message/developer:
+diff --git a/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_review_request_layout.snap b/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_review_request_layout.snap
+index 1ac068f74..c8889e778 100644
+--- a/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_review_request_layout.snap
++++ b/codex-rs/core/src/guardian/snapshots/codex_core__guardian__tests__guardian_review_request_layout.snap
+@@ -7,8 +7,8 @@ Scenario: Guardian review request layout
+ 
+ ## Window 1
+ -- request 1 (request; Guardian Review Request) --
+-00:additional_tools/developer (1; hash=ae2f2f1f9dcd0cd9):
+-        - namespace/functions; hash=fd8638eaf7cabb95
++00:additional_tools/developer (1; hash=808f948a6f51887e):
++        - namespace/functions; hash=d814cc2904cd1f70
+           - custom/exec
+           - function/wait
+ 01:message/developer:
+diff --git a/codex-rs/core/src/memory_usage.rs b/codex-rs/core/src/memory_usage.rs
+index 075a0dd87..0d71b9d6b 100644
+--- a/codex-rs/core/src/memory_usage.rs
++++ b/codex-rs/core/src/memory_usage.rs
+@@ -45,7 +45,7 @@ pub(crate) fn shell_script_for_invocation(invocation: &ToolInvocation) -> Option
+     match invocation.tool_name.name.as_str() {
+         "exec_command" => serde_json::from_str::<ExecCommandArgs>(arguments)
+             .ok()
+-            .map(|params| params.cmd),
++            .and_then(|params| params.command_for_inspection().ok()),
+         _ => None,
+     }
+ }
+diff --git a/codex-rs/core/src/tools/handlers/shell_spec.rs b/codex-rs/core/src/tools/handlers/shell_spec.rs
+index cabe62cbe..a0a17dc44 100644
+--- a/codex-rs/core/src/tools/handlers/shell_spec.rs
++++ b/codex-rs/core/src/tools/handlers/shell_spec.rs
+@@ -35,7 +35,13 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
+     let mut properties = BTreeMap::from([
+         (
+             "cmd".to_string(),
+-            JsonSchema::string(Some("Shell command to execute.".to_string())),
++            JsonSchema::string(Some("Shell script to execute, including pipelines or shell builtins. Use exactly one of cmd or argv.".to_string())),
++        ),
++        (
++            "argv".to_string(),
++            JsonSchema::array(JsonSchema::string(/*description*/ None), Some(
++                "Direct executable and separate arguments, without shell expansion or manual quoting. Use for native programs such as git, rg, python or node. Arbitrary interpreters may be invoked explicitly. Use exactly one of argv or cmd; shell/login:true apply only to cmd. Windows batch files need an explicit cmd.exe invocation.".to_string(),
++            )),
+         ),
+         (
+             "workdir".to_string(),
+@@ -66,7 +72,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
+         properties.insert(
+             "shell".to_string(),
+             JsonSchema::string(Some(
+-                "Shell binary to launch. Defaults to the user's default shell.".to_string(),
++                "Shell family to use (bash, zsh, sh, powershell or cmd). A path selects its family; the executable is discovered by the host, not taken from that path. Unavailable requests fail without running. Omit for the user's default shell.".to_string(),
+             )),
+         );
+     }
+@@ -105,11 +111,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
+         },
+         strict: false,
+         defer_loading: None,
+-        parameters: JsonSchema::object(
+-            properties,
+-            Some(vec!["cmd".to_string()]),
+-            Some(false.into()),
+-        ),
++        parameters: JsonSchema::object(properties, None, Some(false.into())),
+         output_schema: Some(unified_exec_output_schema().into()),
+     })
+ }
+diff --git a/codex-rs/core/src/tools/handlers/shell_spec_tests.rs b/codex-rs/core/src/tools/handlers/shell_spec_tests.rs
+index ee2886a15..825e087d7 100644
+--- a/codex-rs/core/src/tools/handlers/shell_spec_tests.rs
++++ b/codex-rs/core/src/tools/handlers/shell_spec_tests.rs
+@@ -38,7 +38,13 @@ fn exec_command_tool_matches_expected_spec() {
+     let mut properties = BTreeMap::from([
+         (
+             "cmd".to_string(),
+-            JsonSchema::string(Some("Shell command to execute.".to_string())),
++            JsonSchema::string(Some("Shell script to execute, including pipelines or shell builtins. Use exactly one of cmd or argv.".to_string())),
++        ),
++        (
++            "argv".to_string(),
++            JsonSchema::array(JsonSchema::string(/*description*/ None), Some(
++                "Direct executable and separate arguments, without shell expansion or manual quoting. Use for native programs such as git, rg, python or node. Arbitrary interpreters may be invoked explicitly. Use exactly one of argv or cmd; shell/login:true apply only to cmd. Windows batch files need an explicit cmd.exe invocation.".to_string(),
++            )),
+         ),
+         (
+             "workdir".to_string(),
+@@ -50,7 +56,7 @@ fn exec_command_tool_matches_expected_spec() {
+         (
+             "shell".to_string(),
+             JsonSchema::string(Some(
+-                    "Shell binary to launch. Defaults to the user's default shell.".to_string(),
++                    "Shell family to use (bash, zsh, sh, powershell or cmd). A path selects its family; the executable is discovered by the host, not taken from that path. Unavailable requests fail without running. Omit for the user's default shell.".to_string(),
+                 )),
+         ),
+         (
+@@ -88,11 +94,7 @@ fn exec_command_tool_matches_expected_spec() {
+             description,
+             strict: false,
+             defer_loading: None,
+-            parameters: JsonSchema::object(
+-                properties,
+-                Some(vec!["cmd".to_string()]),
+-                Some(false.into())
+-            ),
++            parameters: JsonSchema::object(properties, None, Some(false.into())),
+             output_schema: Some(unified_exec_output_schema().into()),
+         })
+     );
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec.rs b/codex-rs/core/src/tools/handlers/unified_exec.rs
+index 9f9f8a8cf..9f6d51bdc 100644
+--- a/codex-rs/core/src/tools/handlers/unified_exec.rs
++++ b/codex-rs/core/src/tools/handlers/unified_exec.rs
+@@ -1,7 +1,7 @@
+ use crate::sandboxing::SandboxPermissions;
+ use crate::shell::Shell;
+ use crate::shell::ShellType;
+-use crate::shell::get_shell_by_model_provided_path;
++use crate::shell::get_shell;
+ use crate::tools::context::ToolInvocation;
+ use crate::tools::context::ToolOutput;
+ use crate::tools::context::ToolPayload;
+@@ -9,24 +9,31 @@ use crate::tools::hook_names::HookToolName;
+ use crate::tools::registry::PostToolUsePayload;
+ use codex_exec_server::Environment;
+ use codex_protocol::models::AdditionalPermissionProfile;
++use codex_shell_command::shell_detect::detect_shell_type;
+ use codex_tools::UnifiedExecShellMode;
+ use serde::Deserialize;
+-use std::path::PathBuf;
++use std::path::Path;
+ use std::sync::Arc;
+ 
+ #[cfg(test)]
+ use crate::tools::handlers::parse_arguments;
+ 
++mod command_input;
+ mod exec_command;
+ mod write_stdin;
+ 
++use command_input::CommandInput;
++
+ pub use exec_command::ExecCommandHandler;
+ pub(crate) use exec_command::ExecCommandHandlerOptions;
+ pub use write_stdin::WriteStdinHandler;
+ 
+ #[derive(Debug, Deserialize)]
+ pub(crate) struct ExecCommandArgs {
+-    pub(crate) cmd: String,
++    #[serde(default)]
++    pub(crate) cmd: Option<String>,
++    #[serde(default)]
++    argv: Option<Vec<String>>,
+     #[serde(default)]
+     shell: Option<String>,
+     #[serde(default)]
+@@ -74,7 +81,7 @@ fn default_tty() -> bool {
+ #[derive(Debug)]
+ pub(crate) struct ResolvedCommand {
+     pub(crate) command: Vec<String>,
+-    pub(crate) shell_type: ShellType,
++    pub(crate) shell_type: Option<ShellType>,
+ }
+ 
+ fn post_unified_exec_tool_use_payload(
+@@ -102,6 +109,21 @@ pub(crate) fn get_command(
+     shell_mode: &UnifiedExecShellMode,
+     allow_login_shell: bool,
+ ) -> Result<ResolvedCommand, String> {
++    let script = match args.input()? {
++        CommandInput::Argv(argv) => {
++            if !matches!(shell_mode, UnifiedExecShellMode::Direct) {
++                return Err(
++                    "direct argv is unavailable with zsh-fork; use cmd for that execution mode"
++                        .to_string(),
++                );
++            }
++            return Ok(ResolvedCommand {
++                command: argv.to_vec(),
++                shell_type: None,
++            });
++        }
++        CommandInput::Script(script) => script,
++    };
+     let use_login_shell = match args.login {
+         Some(true) if !allow_login_shell => {
+             return Err(
+@@ -117,11 +139,19 @@ pub(crate) fn get_command(
+             let model_shell = args
+                 .shell
+                 .as_ref()
+-                .map(|shell_str| get_shell_by_model_provided_path(&PathBuf::from(shell_str)));
++                .map(|shell_str| {
++                    let shell_type = detect_shell_type(Path::new(shell_str)).ok_or_else(|| {
++                        "unsupported requested shell type; supported types are bash, zsh, sh, powershell and cmd".to_string()
++                    })?;
++                    get_shell(shell_type).ok_or_else(|| {
++                        format!("requested {} shell is unavailable; no command was executed", shell_type.name())
++                    })
++                })
++                .transpose()?;
+             let shell = model_shell.as_ref().unwrap_or(session_shell.as_ref());
+             Ok(ResolvedCommand {
+-                command: shell.derive_exec_args(&args.cmd, use_login_shell),
+-                shell_type: shell.shell_type,
++                command: shell.derive_exec_args(script, use_login_shell),
++                shell_type: Some(shell.shell_type),
+             })
+         }
+         UnifiedExecShellMode::ZshFork(zsh_fork_config) => {
+@@ -135,9 +165,9 @@ pub(crate) fn get_command(
+                 command: vec![
+                     zsh_fork_config.shell_zsh_path.to_string_lossy().to_string(),
+                     if use_login_shell { "-lc" } else { "-c" }.to_string(),
+-                    args.cmd.clone(),
++                    script.to_string(),
+                 ],
+-                shell_type: ShellType::Zsh,
++                shell_type: Some(ShellType::Zsh),
+             })
+         }
+     }
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec/command_input.rs b/codex-rs/core/src/tools/handlers/unified_exec/command_input.rs
+new file mode 100644
+index 000000000..a151bc691
+--- /dev/null
++++ b/codex-rs/core/src/tools/handlers/unified_exec/command_input.rs
+@@ -0,0 +1,79 @@
++use super::ExecCommandArgs;
++use serde_json::Value;
++use serde_json::json;
++
++pub(super) enum CommandInput<'a> {
++    Script(&'a str),
++    Argv(&'a [String]),
++}
++
++impl ExecCommandArgs {
++    pub(super) fn input(&self) -> Result<CommandInput<'_>, String> {
++        match (self.cmd.as_deref(), self.argv.as_deref()) {
++            (Some(script), None) => Ok(CommandInput::Script(script)),
++            (None, Some(argv)) => {
++                if argv.first().is_none_or(String::is_empty) {
++                    return Err("argv must contain a nonempty executable followed by its arguments".to_string());
++                }
++                if argv.iter().any(|arg| arg.contains('\0')) {
++                    return Err("argv cannot contain NUL bytes".to_string());
++                }
++                if self.shell.is_some() || self.login == Some(true) {
++                    return Err("shell and login:true apply to cmd, not direct argv".to_string());
++                }
++                Ok(CommandInput::Argv(argv))
++            }
++            _ => Err("provide exactly one of cmd (shell script) or argv (direct executable and arguments)".to_string()),
++        }
++    }
++
++    pub(crate) fn command_for_inspection(&self) -> Result<String, String> {
++        match self.input()? {
++            CommandInput::Script(script) => Ok(script.to_string()),
++            // Display only: execution uses the original vector, never this shell text.
++            CommandInput::Argv(argv) => {
++                shlex::try_join(argv.iter().map(String::as_str)).map_err(|err| err.to_string())
++            }
++        }
++    }
++
++    pub(super) fn hook_input(&self) -> Result<Value, String> {
++        let mut input = json!({ "command": self.command_for_inspection()? });
++        if let CommandInput::Argv(argv) = self.input()? {
++            input["argv"] = json!(argv);
++        }
++        Ok(input)
++    }
++
++    pub(super) fn rewrite_argv_hook_input(
++        &self,
++        arguments: &str,
++        updated_input: &Value,
++    ) -> Result<String, String> {
++        let argv = updated_input.get("argv").ok_or_else(|| {
++            "a direct argv hook rewrite must provide argv; command text alone cannot rewrite direct execution".to_string()
++        })?;
++        let argv: Vec<String> =
++            serde_json::from_value(argv.clone()).map_err(|err| err.to_string())?;
++        if self.argv.as_ref() == Some(&argv)
++            && let Some(command) = updated_input.get("command")
++            && command != &json!(self.command_for_inspection()?)
++        {
++            return Err(
++                "hook changed command text without changing argv; no command was executed"
++                    .to_string(),
++            );
++        }
++        let mut rewritten: Value =
++            serde_json::from_str(arguments).map_err(|err| err.to_string())?;
++        rewritten["argv"] = json!(argv);
++        let checked: ExecCommandArgs =
++            serde_json::from_value(rewritten.clone()).map_err(|err| err.to_string())?;
++        checked.input()?;
++        serde_json::to_string(&rewritten).map_err(|err| err.to_string())
++    }
++}
++
++#[cfg(test)]
++#[path = "command_input_tests.rs"]
++mod tests;
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec/command_input_tests.rs b/codex-rs/core/src/tools/handlers/unified_exec/command_input_tests.rs
+new file mode 100644
+index 000000000..80ccfbc77
+--- /dev/null
++++ b/codex-rs/core/src/tools/handlers/unified_exec/command_input_tests.rs
+@@ -0,0 +1,117 @@
++use super::*;
++use crate::shell::default_user_shell;
++use crate::tools::handlers::unified_exec::get_command;
++use codex_tools::UnifiedExecShellMode;
++use pretty_assertions::assert_eq;
++use std::sync::Arc;
++
++#[test]
++fn direct_argv_preserves_literal_arguments_without_a_shell() -> anyhow::Result<()> {
++    let argv = vec![
++        "program.exe",
++        "two words",
++        "",
++        "\"quoted\"",
++        "trailing\\",
++        "$name",
++        "%PATH%",
++        "*",
++        "a|b",
++        "a;b",
++        "line\nbreak",
++        "café 東京",
++    ];
++    let args: ExecCommandArgs = serde_json::from_value(json!({ "argv": argv }))?;
++    let resolved = get_command(
++        &args,
++        Arc::new(default_user_shell()),
++        &UnifiedExecShellMode::Direct,
++        /*allow_login_shell*/ true,
++    )
++    .map_err(anyhow::Error::msg)?;
++    assert_eq!(resolved.command, argv);
++    assert_eq!(resolved.shell_type, None);
++    Ok(())
++}
++
++#[test]
++fn ambiguous_or_invalid_execution_requests_fail_before_launch() -> anyhow::Result<()> {
++    for input in [
++        json!({}),
++        json!({"cmd":"echo one", "argv":["echo","two"]}),
++        json!({"argv":[]}),
++        json!({"argv":[""]}),
++        json!({"argv":["echo","nul\u{0000}byte"]}),
++        json!({"argv":["echo"],"shell":"bash"}),
++        json!({"argv":["echo"],"login":true}),
++    ] {
++        let args: ExecCommandArgs = serde_json::from_value(input)?;
++        assert!(
++            get_command(
++                &args,
++                Arc::new(default_user_shell()),
++                &UnifiedExecShellMode::Direct,
++                /*allow_login_shell*/ true
++            )
++            .is_err()
++        );
++    }
++    Ok(())
++}
++
++#[test]
++fn direct_hook_input_carries_display_and_exact_vector() -> anyhow::Result<()> {
++    let args: ExecCommandArgs = serde_json::from_value(json!({"argv":["echo","plain"]}))?;
++    assert_eq!(
++        args.hook_input().map_err(anyhow::Error::msg)?,
++        json!({"command":"echo plain","argv":["echo","plain"]})
++    );
++    Ok(())
++}
++
++#[test]
++fn script_hook_input_retains_its_existing_shape() -> anyhow::Result<()> {
++    let args: ExecCommandArgs = serde_json::from_value(json!({"cmd":"printf hello | sort"}))?;
++    assert_eq!(
++        args.hook_input().map_err(anyhow::Error::msg)?,
++        json!({"command":"printf hello | sort"})
++    );
++    Ok(())
++}
++
++#[test]
++fn direct_hook_rewrite_preserves_noncommand_request_fields() -> anyhow::Result<()> {
++    let original =
++        json!({"argv":["echo","before"],"workdir":"selected","yield_time_ms":2000}).to_string();
++    let args: ExecCommandArgs = serde_json::from_str(&original)?;
++    let rewritten = args
++        .rewrite_argv_hook_input(&original, &json!({"argv":["echo","after value"]}))
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(
++        serde_json::from_str::<Value>(&rewritten)?,
++        json!({"argv":["echo","after value"],"workdir":"selected","yield_time_ms":2000})
++    );
++    Ok(())
++}
++
++#[test]
++fn direct_hook_text_rewrites_cannot_silently_change_or_bypass_execution() -> anyhow::Result<()> {
++    let original = json!({"argv":["echo","before"]}).to_string();
++    let args: ExecCommandArgs = serde_json::from_str(&original)?;
++    for update in [
++        json!({"command":"echo after"}),
++        json!({"argv":["echo","before"],"command":"echo after"}),
++        json!({"argv":[]}),
++        json!({"argv":[42]}),
++    ] {
++        assert!(args.rewrite_argv_hook_input(&original, &update).is_err());
++    }
++    let unchanged = args
++        .rewrite_argv_hook_input(&original, &args.hook_input().map_err(anyhow::Error::msg)?)
++        .map_err(anyhow::Error::msg)?;
++    assert_eq!(
++        serde_json::from_str::<Value>(&unchanged)?,
++        serde_json::from_str::<Value>(&original)?
++    );
++    Ok(())
++}
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
+index bdf687738..ab8d076e7 100644
+--- a/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
++++ b/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs
+@@ -251,7 +251,9 @@ impl ExecCommandHandler {
+         }
+         let sandbox_permissions =
+             resolve_sandbox_permissions(args.sandbox_permissions, args.justification.as_deref())?;
+-        let hook_command = args.cmd.clone();
++        let hook_command = args
++            .command_for_inspection()
++            .map_err(FunctionCallError::RespondToModel)?;
+         maybe_emit_implicit_skill_invocation(
+             session.as_ref(),
+             context.step_context.turn.as_ref(),
+@@ -524,9 +526,10 @@ impl CoreToolRuntime for ExecCommandHandler {
+ 
+         parse_arguments::<ExecCommandArgs>(arguments)
+             .ok()
+-            .map(|args| PreToolUsePayload {
++            .and_then(|args| args.hook_input().ok())
++            .map(|tool_input| PreToolUsePayload {
+                 tool_name: HookToolName::bash(),
+-                tool_input: serde_json::json!({ "command": args.cmd }),
++                tool_input,
+             })
+     }
+ 
+@@ -540,6 +543,15 @@ impl CoreToolRuntime for ExecCommandHandler {
+                 "hook input rewrite received unsupported exec_command payload".to_string(),
+             ));
+         };
++        let args: ExecCommandArgs = parse_arguments(&arguments)?;
++        if args.argv.is_some() {
++            invocation.payload = ToolPayload::Function {
++                arguments: args
++                    .rewrite_argv_hook_input(&arguments, &updated_input)
++                    .map_err(FunctionCallError::RespondToModel)?,
++            };
++            return Ok(invocation);
++        }
+         invocation.payload = ToolPayload::Function {
+             arguments: rewrite_function_string_argument(
+                 &arguments,
+diff --git a/codex-rs/core/src/tools/handlers/unified_exec_tests.rs b/codex-rs/core/src/tools/handlers/unified_exec_tests.rs
+index 46fa63dbb..4830cf6b3 100644
+--- a/codex-rs/core/src/tools/handlers/unified_exec_tests.rs
++++ b/codex-rs/core/src/tools/handlers/unified_exec_tests.rs
+@@ -76,21 +76,25 @@ fn test_get_command_respects_explicit_bash_shell() -> anyhow::Result<()> {
+ 
+     assert_eq!(args.shell.as_deref(), Some("/bin/bash"));
+ 
+-    let resolved = get_command(
++    let result = get_command(
+         &args,
+         Arc::new(default_user_shell()),
+         &UnifiedExecShellMode::Direct,
+         /*allow_login_shell*/ true,
+-    )
+-    .map_err(anyhow::Error::msg)?;
+-    let command = resolved.command;
+-
+-    assert_eq!(command.last(), Some(&"echo hello".to_string()));
+-    if command
+-        .iter()
+-        .any(|arg| arg.eq_ignore_ascii_case("-Command"))
+-    {
+-        assert!(command.contains(&"-NoProfile".to_string()));
++    );
++    match get_shell(ShellType::Bash) {
++        Some(expected) => {
++            let resolved = result.map_err(anyhow::Error::msg)?;
++            assert_eq!(resolved.shell_type, Some(ShellType::Bash));
++            assert_eq!(
++                resolved.command,
++                expected.derive_exec_args("echo hello", /*use_login_shell*/ true)
++            );
++        }
++        None => assert_eq!(
++            result.unwrap_err(),
++            "requested bash shell is unavailable; no command was executed"
++        ),
+     }
+     Ok(())
+ }
+@@ -117,24 +121,31 @@ fn test_get_command_resolves_powershell_by_type() -> anyhow::Result<()> {
+         Some(powershell_path.to_string_lossy().as_ref())
+     );
+ 
+-    let resolved = get_command(
++    let result = get_command(
+         &args,
+         Arc::new(default_user_shell()),
+         &UnifiedExecShellMode::Direct,
+         /*allow_login_shell*/ true,
+-    )
+-    .map_err(anyhow::Error::msg)?;
+-    let expected_shell = get_shell(ShellType::PowerShell)
+-        .unwrap_or_else(|| codex_shell_command::shell_detect::ultimate_fallback_shell().into());
+-    assert_eq!(
+-        resolved.command,
+-        expected_shell.derive_exec_args("echo hello", /*use_login_shell*/ true)
+     );
+-    assert_eq!(resolved.shell_type, expected_shell.shell_type);
++    match get_shell(ShellType::PowerShell) {
++        Some(expected_shell) => {
++            let resolved = result.map_err(anyhow::Error::msg)?;
++            assert_eq!(
++                resolved.command,
++                expected_shell.derive_exec_args("echo hello", /*use_login_shell*/ true)
++            );
++            assert_eq!(resolved.shell_type, Some(expected_shell.shell_type));
++        }
++        None => assert_eq!(
++            result.unwrap_err(),
++            "requested powershell shell is unavailable; no command was executed"
++        ),
++    }
+     Ok(())
+ }
+ 
+ #[test]
++#[cfg(windows)]
+ fn test_get_command_respects_explicit_cmd_shell() -> anyhow::Result<()> {
+     let json = r#"{"cmd": "echo hello", "shell": "cmd"}"#;
+ 
+@@ -155,6 +166,23 @@ fn test_get_command_respects_explicit_cmd_shell() -> anyhow::Result<()> {
+     Ok(())
+ }
+ 
++#[test]
++fn requested_unknown_shell_is_not_reinterpreted_by_default_shell() -> anyhow::Result<()> {
++    let args: ExecCommandArgs =
++        parse_arguments(r#"{"cmd":"echo never-run","shell":"unsupported-shell"}"#)?;
++    let result = get_command(
++        &args,
++        Arc::new(default_user_shell()),
++        &UnifiedExecShellMode::Direct,
++        /*allow_login_shell*/ false,
++    );
++    assert_eq!(
++        result.unwrap_err(),
++        "unsupported requested shell type; supported types are bash, zsh, sh, powershell and cmd"
++    );
++    Ok(())
++}
++
+ #[test]
+ fn test_get_command_rejects_explicit_login_when_disallowed() -> anyhow::Result<()> {
+     let json = r#"{"cmd": "echo hello", "login": true}"#;
+diff --git a/codex-rs/core/src/tools/runtimes/unified_exec.rs b/codex-rs/core/src/tools/runtimes/unified_exec.rs
+index 354e9324d..72c6a1a5b 100644
+--- a/codex-rs/core/src/tools/runtimes/unified_exec.rs
++++ b/codex-rs/core/src/tools/runtimes/unified_exec.rs
+@@ -69,7 +69,7 @@ const REMOTE_NETWORK_POLICY_DECISION_MARGIN: Duration = Duration::from_secs(10);
+ #[derive(Clone, Debug)]
+ pub struct UnifiedExecRequest {
+     pub command: Vec<String>,
+-    pub shell_type: ShellType,
++    pub shell_type: Option<ShellType>,
+     pub hook_command: String,
+     pub process_id: i32,
+     pub cwd: PathUri,
+@@ -293,6 +293,11 @@ impl<'a> ToolRuntime<UnifiedExecRequest, UnifiedExecAttempt> for UnifiedExecRunt
+                 .network
+                 .as_ref()
+                 .is_some_and(crate::config::NetworkProxySpec::credential_broker_enabled);
++        if req.shell_type.is_none() && credential_broker_available {
++            return Err(ToolError::Rejected(
++                "direct argv is not yet supported with credential brokerage; use cmd".to_string(),
++            ));
++        }
+         if credential_broker_available
+             && managed_network.is_some()
+             && matches!(self.shell_mode, UnifiedExecShellMode::ZshFork(_))
+@@ -301,20 +306,23 @@ impl<'a> ToolRuntime<UnifiedExecRequest, UnifiedExecAttempt> for UnifiedExecRunt
+                 "credential brokerage does not yet support shell_zsh_fork; disable shell_zsh_fork to use the broker".to_string(),
+             ));
+         }
+-        let requested_shell = (credential_broker_available
+-            && (req.shell_type != environment_shell.shell_type
+-                || base_command.first().is_some_and(|path| {
+-                    path != environment_shell.shell_path.to_string_lossy().as_ref()
+-                })))
+-        .then(|| {
+-            base_command.first().map(|path| crate::shell::Shell {
+-                shell_type: req.shell_type,
+-                shell_path: PathBuf::from(path),
++        let requested_shell = req.shell_type.and_then(|shell_type| {
++            (credential_broker_available
++                && (shell_type != environment_shell.shell_type
++                    || base_command.first().is_some_and(|path| {
++                        path != environment_shell.shell_path.to_string_lossy().as_ref()
++                    })))
++            .then(|| {
++                base_command.first().map(|path| crate::shell::Shell {
++                    shell_type,
++                    shell_path: PathBuf::from(path),
++                })
+             })
+-        })
+-        .flatten();
++            .flatten()
++        });
+         let shell = requested_shell.as_ref().unwrap_or(environment_shell);
+-        let shell_snapshot = if environment_is_remote
++        let shell_snapshot = if req.shell_type.is_none()
++            || environment_is_remote
+             || credential_broker_available
+                 && launch_sandbox_permissions.requires_escalated_permissions()
+         {
+@@ -569,12 +577,12 @@ impl<'a> ToolRuntime<UnifiedExecRequest, UnifiedExecAttempt> for UnifiedExecRunt
+         }
+         let command = prepare_powershell_command_for_elevated_windows_sandbox(
+             &command,
+-            Some(&req.shell_type),
++            req.shell_type.as_ref(),
+             attempt.sandbox_requested,
+             attempt.windows_sandbox_level,
+             environment_is_remote,
+         );
+-        let command = if matches!(req.shell_type, ShellType::PowerShell) {
++        let command = if matches!(req.shell_type, Some(ShellType::PowerShell)) {
+             prefix_powershell_script_with_utf8(&command)
+         } else {
+             command
+@@ -840,7 +848,7 @@ mod tests {
+         let runtime = UnifiedExecRuntime::new(&manager, UnifiedExecShellMode::Direct);
+         let request = UnifiedExecRequest {
+             command: vec!["pwd".to_string()],
+-            shell_type: ShellType::Sh,
++            shell_type: Some(ShellType::Sh),
+             hook_command: "pwd".to_string(),
+             process_id: 1000,
+             cwd: cwd.into(),
+@@ -943,7 +951,7 @@ mod tests {
+             .expect("current dir is absolute");
+         UnifiedExecRequest {
+             command: vec!["zsh".to_string(), "-c".to_string(), "echo hi".to_string()],
+-            shell_type: ShellType::Zsh,
++            shell_type: Some(ShellType::Zsh),
+             hook_command: "echo hi".to_string(),
+             process_id: 1000,
+             cwd: cwd.clone().into(),
+diff --git a/codex-rs/core/src/unified_exec/mod.rs b/codex-rs/core/src/unified_exec/mod.rs
+index 3645306c2..472ce599a 100644
+--- a/codex-rs/core/src/unified_exec/mod.rs
++++ b/codex-rs/core/src/unified_exec/mod.rs
+@@ -113,7 +113,7 @@ impl UnifiedExecContext {
+ #[derive(Debug)]
+ pub(crate) struct ExecCommandRequest {
+     pub command: Vec<String>,
+-    pub shell_type: ShellType,
++    pub shell_type: Option<ShellType>,
+     pub hook_command: String,
+     pub process_id: i32,
+     pub yield_time_ms: u64,
+diff --git a/codex-rs/core/src/unified_exec/process_manager_tests.rs b/codex-rs/core/src/unified_exec/process_manager_tests.rs
+index 297c84fa7..a6b48b4db 100644
+--- a/codex-rs/core/src/unified_exec/process_manager_tests.rs
++++ b/codex-rs/core/src/unified_exec/process_manager_tests.rs
+@@ -453,7 +453,7 @@ async fn failed_initial_end_for_unstored_process_uses_fallback_output() {
+             "-lc".to_string(),
+             "echo before".to_string(),
+         ],
+-        shell_type: crate::shell::ShellType::Sh,
++        shell_type: Some(crate::shell::ShellType::Sh),
+         hook_command: "echo before".to_string(),
+         process_id: 123,
+         yield_time_ms: 1000,
+diff --git a/codex-rs/core/src/unified_exec/shell_snapshot.rs b/codex-rs/core/src/unified_exec/shell_snapshot.rs
+index dc79ea461..7ab39efea 100644
+--- a/codex-rs/core/src/unified_exec/shell_snapshot.rs
++++ b/codex-rs/core/src/unified_exec/shell_snapshot.rs
+@@ -175,14 +175,12 @@ pub(super) fn shell_snapshot_request(
+     cwd: &PathUri,
+     context: &UnifiedExecContext,
+ ) -> Option<ShellSnapshotRequest> {
++    let shell_type = request.shell_type?;
+     if !context.session.features().enabled(Feature::ShellSnapshotV2)
+         || !request.turn_environment.shell_snapshot_v2_supported
+         || request.turn_environment.selection.cwd != *cwd
+         || !matches!(request.shell_mode, UnifiedExecShellMode::Direct)
+-        || !matches!(
+-            request.shell_type,
+-            ShellType::Bash | ShellType::Zsh | ShellType::Sh
+-        )
++        || !matches!(shell_type, ShellType::Bash | ShellType::Zsh | ShellType::Sh)
+         || request.command.get(1).is_none_or(|flag| flag != "-lc")
+     {
+         return None;
+@@ -195,7 +193,7 @@ pub(super) fn shell_snapshot_request(
+             request.turn_environment.selection.environment_id
+         ),
+         shell: ShellInfo {
+-            name: request.shell_type.name().to_string(),
++            name: shell_type.name().to_string(),
+             path: request.command.first()?.clone(),
+         },
+     })
+diff --git a/codex-rs/core/tests/suite/mod.rs b/codex-rs/core/tests/suite/mod.rs
+index 8b4d4ff2f..b361e6dc3 100644
+--- a/codex-rs/core/tests/suite/mod.rs
++++ b/codex-rs/core/tests/suite/mod.rs
+@@ -210,6 +210,7 @@ mod truncation;
+ mod turn_input_submission;
+ mod turn_state;
+ mod unified_exec;
++mod unified_exec_argv;
+ mod unified_exec_process_events;
+ mod unified_exec_stdin_approval;
+ mod unified_exec_stdin_review_size;
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__app_tool_exposure_CodeModeOnly.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__app_tool_exposure_CodeModeOnly.snap
+index 544533d9b..6b529cbdc 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__app_tool_exposure_CodeModeOnly.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__app_tool_exposure_CodeModeOnly.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 1188
+ expression: "context_snapshot::format_request_history_snapshot(\"A non-deferred connector is called through code mode while another connector stays deferred.\",\n&requests,\n&ContextSnapshotOptions::default().rewrite_known_segments().include_request_settings(),)"
+ ---
+ Scenario: A non-deferred connector is called through code mode while another connector stays deferred.
+@@ -16,8 +17,8 @@ Settings:
+   stream: true
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+-  tools (4; hash=8f44dd235bfe4473):
+-    - custom/exec: Run JavaScript code to orchestrate/compose tool calls - Evaluates the provided JavaScript code in...; hash=0fc6c2a32798a2ec
++  tools (4; hash=fb999de103c4a930):
++    - custom/exec: Run JavaScript code to orchestrate/compose tool calls - Evaluates the provided JavaScript code in...; hash=6be59a23defbda99
+     - function/wait: Waits on a yielded `exec` cell and returns new output or completion. - Use `wait` only after `exe...; args=[cell_id, max_tokens, terminate, yield_time_ms]; hash=6692d8f6c55be489
+     - function/request_user_input: Request user input for one to three short questions and wait for the response. This tool is only ...; args=[questions]; hash=64a729b25c424fc6
+     - web_search; hash=e214d4db1bc49e89
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_active_environment_selection.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_active_environment_selection.snap
+index a2677a2da..551e9e353 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_active_environment_selection.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_active_environment_selection.snap
+@@ -1,13 +1,14 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 446
+ expression: "context_snapshot::format_request_history_snapshot(\"Astra starts in one workspace, switches for the next step of the active turn, and returns to the original workspace on the next turn.\",\n&requests, &ContextSnapshotOptions::default(),)"
+ ---
+ Scenario: Astra starts in one workspace, switches for the next step of the active turn, and returns to the original workspace on the next turn.
+ 
+ ## Window 1
+ -- request 1 (turn) --
+-00:additional_tools/developer (3; hash=b1e101cdca5088a0):
+-        - namespace/functions; hash=dead25325ac79c67
++00:additional_tools/developer (3; hash=73a522004a2f99ad):
++        - namespace/functions; hash=63f5395b04537d1e
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_async_question_and_answer.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_async_question_and_answer.snap
+index a1c7a2a97..f422c4437 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_async_question_and_answer.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_async_question_and_answer.snap
+@@ -1,14 +1,14 @@
+ ---
+ source: core/tests/suite/scenarios.rs
+-assertion_line: 304
++assertion_line: 325
+ expression: "context_snapshot::format_context_snapshot(\"Astra asks who a launch update is for, keeps working, and receives the user's answer in the active turn.\",\n&entries, &ContextSnapshotOptions::default().rewrite_known_segments(),)"
+ ---
+ Scenario: Astra asks who a launch update is for, keeps working, and receives the user's answer in the active turn.
+ 
+ ## Window 1
+ -- request 1 (request) --
+-00:additional_tools/developer (3; hash=32be5470c6e39932):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=fe6f9e08d0571cbd):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_code_mode_call_timing.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_code_mode_call_timing.snap
+index 4b234d314..4dab03e73 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_code_mode_call_timing.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_code_mode_call_timing.snap
+@@ -1,13 +1,14 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 908
+ expression: "context_snapshot::format_request_history_snapshot(\"Astra receives host and handler timings on completed and failed code-mode calls.\",\n&mock.requests(), &ContextSnapshotOptions::default(),)"
+ ---
+ Scenario: Astra receives host and handler timings on completed and failed code-mode calls.
+ 
+ ## Window 1
+ -- request 1 (turn) --
+-00:additional_tools/developer (3; hash=32be5470c6e39932):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=fe6f9e08d0571cbd):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_disabled_executor_skills.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_disabled_executor_skills.snap
+index cd1f3aa3b..1631c84cd 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_disabled_executor_skills.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_disabled_executor_skills.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 667
+ expression: "context_snapshot::format_context_snapshot(\"Astra sees the active executor skill while the caller-disabled skill is omitted.\",\n&[SnapshotEntry::body(&body)],\n&ContextSnapshotOptions::default().include_request_settings(),)"
+ ---
+ Scenario: Astra sees the active executor skill while the caller-disabled skill is omitted.
+@@ -16,8 +17,8 @@ Settings:
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+ -- request 1 (request) --
+-00:additional_tools/developer (3; hash=61ac4d92c828cbf9):
+-        - namespace/functions; hash=99a630cff25563aa
++00:additional_tools/developer (3; hash=8f2929d047b06428):
++        - namespace/functions; hash=5432c191f47e8ff7
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_kickoff_remote_compaction_windows.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_kickoff_remote_compaction_windows.snap
+index c91996548..646ee3bff 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_kickoff_remote_compaction_windows.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_kickoff_remote_compaction_windows.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 561
+ expression: "context_snapshot::format_request_history_snapshot(\"Astra plans a kickoff with local and plugin skills, remotely compacts, and checks an image brief.\",\n&requests, &ContextSnapshotOptions::default().include_request_settings(),)"
+ ---
+ Scenario: Astra plans a kickoff with local and plugin skills, remotely compacts, and checks an image brief.
+@@ -16,8 +17,8 @@ Settings:
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+ -- request 1 (turn) --
+-00:additional_tools/developer (3; hash=32be5470c6e39932):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=fe6f9e08d0571cbd):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+@@ -187,8 +188,8 @@ Settings:
+ ## Window 2 (after request 3: input diverged at item 02)
+ Settings: same as window 1
+ -- request 4 (turn) --
+-00:additional_tools/developer (3; hash=32be5470c6e39932):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=fe6f9e08d0571cbd):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_plugin_refresh.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_plugin_refresh.snap
+index 4b95c9557..58a4c9827 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_plugin_refresh.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_plugin_refresh.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 1117
+ expression: "context_snapshot::format_request_history_snapshot(\"Astra checks for Notes, refreshes its installed plugin without restarting, and uses the new skill and Code Mode MCP tool across turns.\",\n&mock.requests(),\n&ContextSnapshotOptions::default().include_request_settings(),)"
+ ---
+ Scenario: Astra checks for Notes, refreshes its installed plugin without restarting, and uses the new skill and Code Mode MCP tool across turns.
+@@ -16,8 +17,8 @@ Settings:
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+ -- request 1 (turn) --
+-00:additional_tools/developer (3; hash=32be5470c6e39932):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=fe6f9e08d0571cbd):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+@@ -110,8 +111,8 @@ Settings:
+ ## Window 2 (after request 2: input diverged at item 00)
+ Settings: same as window 1
+ -- request 3 (turn) --
+-00:additional_tools/developer (3; hash=4327e247f74ba810):
+-        - namespace/functions; hash=8c17932a39355f2d
++00:additional_tools/developer (3; hash=9e75c8e5d9e73437):
++        - namespace/functions; hash=13763aefbaa738ba
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__code_mode_catalog_messages.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__code_mode_catalog_messages.snap
+index ac08dca9c..568f92892 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__code_mode_catalog_messages.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__code_mode_catalog_messages.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 1002
+ expression: "context_snapshot::format_request_history_snapshot(\"Catalog Code Mode instructions and wait parameter descriptions accompany a yielded cell through completion.\",\n&requests, &ContextSnapshotOptions::default().include_request_settings(),)"
+ ---
+ Scenario: Catalog Code Mode instructions and wait parameter descriptions accompany a yielded cell through completion.
+@@ -32,8 +33,8 @@ Settings:
+   stream: true
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+-  tools (7; hash=884bfb8fc9050f65):
+-    - custom/exec: Catalog exec instructions. Default yield: 1234 ms. `image(imageUrlOrItem: string | { image_url: s...; hash=a49b91fd82908e18
++  tools (7; hash=c808086b4c7168a4):
++    - custom/exec: Catalog exec instructions. Default yield: 1234 ms. `image(imageUrlOrItem: string | { image_url: s...; hash=11d4af2484a0babb
+     - function/wait: Catalog wait instructions: resume the yielded cell.; args=[cell_id, max_tokens, terminate, yield_time_ms]; hash=67bc0f04da3505b3
+     - function/request_user_input: Request user input for one to three short questions and wait for the response. This tool is only ...; args=[questions]; hash=64a729b25c424fc6
+     - function/request_user_input_async: Ask the user one or more questions during ongoing work. Use this tool only to request missing inf...; args=[questions]; hash=d6d74f33db330162
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_checkpoint_migration.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_checkpoint_migration.snap
+index 7e305f4bc..55a1810ee 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_checkpoint_migration.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_checkpoint_migration.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 1176
+ expression: snapshot
+ ---
+ Scenario: An old checkpoint retains a user restriction and verified answer. Incompatible automatic compaction keeps legacy review across restart with its saved answer; compatible manual compaction immediately activates thread-owned review.
+@@ -16,8 +17,8 @@ Settings:
+   stream: true
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+-  tools (7; hash=c7eaf521f176989a):
+-    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=c04108e51a8548c5
++  tools (7; hash=fa0d1923b34e49ed):
++    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[argv, cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=7072ae4b59649300
+     - function/write_stdin: Writes characters to an existing unified exec session and returns recent output.; args=[chars, max_output_tokens, session_id, yield_time_ms]; hash=7fb62d8a3e2df4e2
+     - function/request_user_input: Request user input for one to three short questions and wait for the response. This tool is only ...; args=[questions]; hash=7c8f464569dbaa9c
+     - custom/apply_patch: The `apply_patch` tool can be used to edit files. This is a FREEFORM tool, so do not wrap the pat...; hash=dea9f12b0111a4ba
+@@ -48,8 +49,8 @@ Settings: relative to window 1
+   reasoning: {"context":"all_turns","effort":"medium"}
+   tools: <removed>
+ -- request 4 (turn) --
+-00:additional_tools/developer (1; hash=2e71c3c832baebb6):
+-        - namespace/functions; hash=cea33529f2099460
++00:additional_tools/developer (1; hash=5a84847f68aff0bf):
++        - namespace/functions; hash=45b3a9ff7c17dc13
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+@@ -77,8 +78,8 @@ Settings: relative to window 2
+   reasoning: {"context":"all_turns","effort":"low"}
+   text: {"format":{"name":"codex_output_schema","schema":{"additionalProperties":false,"properties":{"outcome":{"enum":["allow","deny"],"type":"string"},"rationale":{"type":"string"},"risk_level":{"enum":["low","medium","high","critical"],"type":"string"},"user_authorization":{"enum":["unknown","low","medium","high"],"type":"string"}},"required":["outcome"],"type":"object"},"strict":false,"type":"json_schema"},"verbosity":"low"}
+ -- request 6 (turn) --
+-00:additional_tools/developer (1; hash=ae2f2f1f9dcd0cd9):
+-        - namespace/functions; hash=fd8638eaf7cabb95
++00:additional_tools/developer (1; hash=808f948a6f51887e):
++        - namespace/functions; hash=d814cc2904cd1f70
+           - custom/exec
+           - function/wait
+ 01:message/developer:
+@@ -163,8 +164,8 @@ Settings: relative to window 2
+ ## Window 4 (after request 6: input diverged at item 00)
+ Settings: same as window 2
+ -- request 7 (turn) --
+-00:additional_tools/developer (1; hash=2e71c3c832baebb6):
+-        - namespace/functions; hash=cea33529f2099460
++00:additional_tools/developer (1; hash=5a84847f68aff0bf):
++        - namespace/functions; hash=45b3a9ff7c17dc13
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+@@ -192,8 +193,8 @@ Settings: same as window 2
+ ## Window 5 (after request 8: input diverged at item 04)
+ Settings: same as window 2
+ -- request 9 (turn) --
+-00:additional_tools/developer (1; hash=2e71c3c832baebb6):
+-        - namespace/functions; hash=cea33529f2099460
++00:additional_tools/developer (1; hash=5a84847f68aff0bf):
++        - namespace/functions; hash=45b3a9ff7c17dc13
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+@@ -218,8 +219,8 @@ Settings: same as window 2
+ ## Window 6 (after request 9: input diverged at item 00)
+ Settings: same as window 3
+ -- request 10 (turn) --
+-00:additional_tools/developer (1; hash=ae2f2f1f9dcd0cd9):
+-        - namespace/functions; hash=fd8638eaf7cabb95
++00:additional_tools/developer (1; hash=808f948a6f51887e):
++        - namespace/functions; hash=d814cc2904cd1f70
+           - custom/exec
+           - function/wait
+ 01:message/developer:
+@@ -305,8 +306,8 @@ Settings: same as window 3
+ ## Window 7 (after request 10: input diverged at item 00)
+ Settings: same as window 2
+ -- request 11 (turn) --
+-00:additional_tools/developer (1; hash=2e71c3c832baebb6):
+-        - namespace/functions; hash=cea33529f2099460
++00:additional_tools/developer (1; hash=5a84847f68aff0bf):
++        - namespace/functions; hash=45b3a9ff7c17dc13
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_extra_policy__extra_policy_reaches_guardian_review.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_extra_policy__extra_policy_reaches_guardian_review.snap
+index 0e700c5f6..ff4ea9d4c 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_extra_policy__extra_policy_reaches_guardian_review.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__guardian_extra_policy__extra_policy_reaches_guardian_review.snap
+@@ -33,8 +33,8 @@ Settings:
+   stream: true
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+-  tools (7; hash=9ca29162272b7d54):
+-    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=c04108e51a8548c5
++  tools (7; hash=e2920ad36c8ffc5d):
++    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[argv, cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=7072ae4b59649300
+     - function/write_stdin: Writes characters to an existing unified exec session and returns recent output.; args=[chars, max_output_tokens, session_id, yield_time_ms]; hash=7fb62d8a3e2df4e2
+     - function/request_user_input: Request user input for one to three short questions and wait for the response. This tool is only ...; args=[questions]; hash=64a729b25c424fc6
+     - custom/apply_patch: The `apply_patch` tool can be used to edit files. This is a FREEFORM tool, so do not wrap the pat...; hash=dea9f12b0111a4ba
+@@ -81,8 +81,8 @@ Settings: relative to window 1
+   text: {"format":{"name":"codex_output_schema","schema":{"additionalProperties":false,"properties":{"outcome":{"enum":["allow","deny"],"type":"string"},"rationale":{"type":"string"},"risk_level":{"enum":["low","medium","high","critical"],"type":"string"},"user_authorization":{"enum":["unknown","low","medium","high"],"type":"string"}},"required":["outcome"],"type":"object"},"strict":false,"type":"json_schema"},"verbosity":"low"}
+   tools: <removed>
+ -- request 2 (turn) --
+-00:additional_tools/developer (1; hash=ae2f2f1f9dcd0cd9):
+-        - namespace/functions; hash=fd8638eaf7cabb95
++00:additional_tools/developer (1; hash=808f948a6f51887e):
++        - namespace/functions; hash=d814cc2904cd1f70
+           - custom/exec
+           - function/wait
+ 01:message/developer:
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__multi_agent_catalog_parameters.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__multi_agent_catalog_parameters.snap
+index dbf411d8a..499ded85a 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__multi_agent_catalog_parameters.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__multi_agent_catalog_parameters.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 730
+ expression: "context_snapshot::format_request_history_snapshot(\"Astra calls list_agents using the selected catalog parameter schema.\",\n&mock.requests(),\n&ContextSnapshotOptions::default().include_request_settings(),)"
+ ---
+ Scenario: Astra calls list_agents using the selected catalog parameter schema.
+@@ -16,8 +17,8 @@ Settings:
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+ -- request 1 (turn) --
+-00:additional_tools/developer (3; hash=48937f38e1083468):
+-        - namespace/functions; hash=e7db0a45c4ec3157
++00:additional_tools/developer (3; hash=d0ab636c00f1d0e1):
++        - namespace/functions; hash=18d6443687b76060
+           - custom/exec
+           - function/wait
+           - function/request_user_input
+diff --git a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__subagent_browser_auth.snap b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__subagent_browser_auth.snap
+index 2700ea2ef..061c791fa 100644
+--- a/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__subagent_browser_auth.snap
++++ b/codex-rs/core/tests/suite/snapshots/all__suite__scenarios__subagent_browser_auth.snap
+@@ -1,5 +1,6 @@
+ ---
+ source: core/tests/suite/scenarios.rs
++assertion_line: 1148
+ expression: snapshot
+ ---
+ Scenario: A subagent waits for an MCP browser sign-in prompt, then receives the accepted response and continues.
+@@ -16,8 +17,8 @@ Settings:
+   stream: true
+   text: {"verbosity":"low"}
+   tool_choice: "auto"
+-  tools (10; hash=1d541727c70b02b8):
+-    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=c04108e51a8548c5
++  tools (10; hash=7e4010ccea5d72b9):
++    - function/exec_command: Runs a command in a PTY, returning output or a session ID for ongoing interaction.; args=[argv, cmd, justification, login, max_output_tokens, prefix_rule, sandbox_permissions, shell, tty, workdir, yield_time_ms]; hash=7072ae4b59649300
+     - function/write_stdin: Writes characters to an existing unified exec session and returns recent output.; args=[chars, max_output_tokens, session_id, yield_time_ms]; hash=7fb62d8a3e2df4e2
+     - function/list_mcp_resources: Lists resources provided by MCP servers. Resources allow servers to share data that provides cont...; args=[cursor, server]; hash=6792edaff13561bd
+     - function/list_mcp_resource_templates: Lists resource templates provided by MCP servers. Parameterized resource templates allow servers ...; args=[cursor, server]; hash=60f17c90ef7a4ebb
+diff --git a/codex-rs/core/tests/suite/unified_exec_argv.rs b/codex-rs/core/tests/suite/unified_exec_argv.rs
+new file mode 100644
+index 000000000..23874a13f
+--- /dev/null
++++ b/codex-rs/core/tests/suite/unified_exec_argv.rs
+@@ -0,0 +1,256 @@
++use anyhow::Result;
++use codex_protocol::models::PermissionProfile;
++use codex_protocol::protocol::AskForApproval;
++use core_test_support::TestTargetOs;
++use core_test_support::responses::ev_completed;
++use core_test_support::responses::ev_function_call;
++use core_test_support::responses::ev_response_created;
++use core_test_support::responses::mount_sse_sequence;
++use core_test_support::responses::sse;
++use core_test_support::test_codex::TestCodexHarness;
++use core_test_support::test_codex::test_codex;
++use core_test_support::test_target_os;
++use pretty_assertions::assert_eq;
++use serde_json::json;
++
++fn python_program() -> &'static str {
++    match test_target_os() {
++        TestTargetOs::Windows => "python",
++        TestTargetOs::Linux | TestTargetOs::MacOs => "python3",
++    }
++}
++
++#[cfg(windows)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn requested_bash_launches_bash_on_windows() -> Result<()> {
++    if core_test_support::is_remote_test_environment() {
++        eprintln!(
++            "local Windows shell-discovery fixture; remote shell selection is separately constrained"
++        );
++        return Ok(());
++    }
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let arguments = json!({"cmd":"printf BASH_ROUTE_OK","shell":"bash","login":false});
++    mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("bash-start"),
++                ev_function_call("requested-bash", "exec_command", &arguments.to_string()),
++                ev_completed("bash-start"),
++            ]),
++            sse(vec![ev_completed("bash-done")]),
++        ],
++    )
++    .await;
++    harness
++        .submit("check requested Bash really runs Bash")
++        .await?;
++    let output = harness.function_call_stdout("requested-bash").await;
++    assert!(
++        output.contains("BASH_ROUTE_OK") && output.contains("Process exited with code 0"),
++        "requested Bash did not execute: {output}"
++    );
++    Ok(())
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn direct_argv_executes_through_the_normal_tool_loop() -> Result<()> {
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let arguments = json!({"argv":["git","--version"],"yield_time_ms":1000});
++    let requests = mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("argv-start"),
++                ev_function_call("argv-git", "exec_command", &arguments.to_string()),
++                ev_completed("argv-start"),
++            ]),
++            sse(vec![ev_completed("argv-done")]),
++        ],
++    )
++    .await;
++    harness
++        .submit_with_permission_profile("inspect Git version", PermissionProfile::Disabled)
++        .await?;
++    let output = harness.function_call_stdout("argv-git").await;
++    assert!(
++        output.contains("git version"),
++        "unexpected direct-program result: {output}"
++    );
++    let request = requests.requests()[0].body_json();
++    let tool = request["tools"]
++        .as_array()
++        .expect("tools")
++        .iter()
++        .find(|tool| tool["name"] == "exec_command")
++        .expect("exec_command");
++    assert!(tool["parameters"]["properties"].get("argv").is_some());
++    Ok(())
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn conflicting_input_modes_do_not_execute_either_command() -> Result<()> {
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let arguments =
++        json!({"cmd":"echo wrong > conflicting-mode-ran.txt", "argv":["git","--version"]});
++    mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("conflict-start"),
++                ev_function_call("argv-conflict", "exec_command", &arguments.to_string()),
++                ev_completed("conflict-start"),
++            ]),
++            sse(vec![ev_completed("conflict-done")]),
++        ],
++    )
++    .await;
++    harness
++        .submit_with_permission_profile(
++            "check conflicting input rejection",
++            PermissionProfile::Disabled,
++        )
++        .await?;
++    let output = harness.function_call_stdout("argv-conflict").await;
++    assert!(
++        output.contains("provide exactly one of cmd"),
++        "unexpected conflict result: {output}"
++    );
++    assert!(!harness.path_exists("conflicting-mode-ran.txt").await?);
++    Ok(())
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn direct_argv_keeps_the_existing_permission_rejection() -> Result<()> {
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let arguments = json!({"argv":["git","--version"], "sandbox_permissions":"require_escalated", "justification":"permission regression fixture"});
++    mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("permission-start"),
++                ev_function_call("argv-permission", "exec_command", &arguments.to_string()),
++                ev_completed("permission-start"),
++            ]),
++            sse(vec![ev_completed("permission-done")]),
++        ],
++    )
++    .await;
++    harness
++        .test()
++        .submit_turn_with_approval_and_permission_profile(
++            "check unchanged permission boundary",
++            AskForApproval::Never,
++            PermissionProfile::Disabled,
++        )
++        .await?;
++    let output = harness.function_call_stdout("argv-permission").await;
++    assert!(
++        output.contains("approval policy") && output.contains("reject command"),
++        "unexpected permission result: {output}"
++    );
++    assert!(!output.contains("git version"));
++    Ok(())
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn direct_argv_preserves_hostile_arguments_and_nonzero_exit() -> Result<()> {
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let values = [
++        "two words",
++        "",
++        "\"quoted\"",
++        "trailing\\",
++        "$name",
++        "%PATH%",
++        "*",
++        "a|b",
++        "a;b",
++        "line\nbreak",
++        "café 東京",
++    ];
++    let mut argv = vec![
++        python_program(),
++        "-c",
++        "import json,sys; print(json.dumps(sys.argv[1:],ensure_ascii=True)); print('ARGUMENT_PROBE_STDERR',file=sys.stderr); sys.exit(7)",
++    ];
++    argv.extend(values);
++    let arguments = json!({"argv":argv});
++    mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("literal-start"),
++                ev_function_call("argv-literals", "exec_command", &arguments.to_string()),
++                ev_completed("literal-start"),
++            ]),
++            sse(vec![ev_completed("literal-done")]),
++        ],
++    )
++    .await;
++    harness
++        .submit("exercise literal arguments and a nonzero exit")
++        .await?;
++    let output = harness.function_call_stdout("argv-literals").await;
++    assert!(
++        output.contains("Process exited with code 7"),
++        "unexpected exit result: {output}"
++    );
++    assert!(
++        output.contains("ARGUMENT_PROBE_STDERR"),
++        "stderr was lost: {output}"
++    );
++    let payload = output
++        .lines()
++        .find(|line| line.starts_with('['))
++        .expect("JSON argument output");
++    assert_eq!(serde_json::from_str::<Vec<String>>(payload)?, values);
++    Ok(())
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn direct_argv_retains_pty_input_and_session_completion() -> Result<()> {
++    let harness =
++        TestCodexHarness::with_auto_env_builder(test_codex().with_model("gpt-5.4")).await?;
++    let arguments = json!({"argv":[python_program(),"-u","-c","import sys; print('ARGV_READY',flush=True); print('ARGV_RECEIVED:'+sys.stdin.readline().strip(),flush=True)"],"tty":true,"yield_time_ms":1000});
++    let input = json!({"session_id":1000,"chars":"literal-input\n","yield_time_ms":1000});
++    mount_sse_sequence(
++        harness.server(),
++        vec![
++            sse(vec![
++                ev_response_created("pty-start"),
++                ev_function_call("argv-pty", "exec_command", &arguments.to_string()),
++                ev_completed("pty-start"),
++            ]),
++            sse(vec![
++                ev_response_created("pty-input"),
++                ev_function_call("argv-stdin", "write_stdin", &input.to_string()),
++                ev_completed("pty-input"),
++            ]),
++            sse(vec![ev_completed("pty-done")]),
++        ],
++    )
++    .await;
++    harness.submit("exercise direct-program PTY input").await?;
++    let started = harness.function_call_stdout("argv-pty").await;
++    assert!(
++        started.contains("ARGV_READY") && started.contains("Process running with session ID 1000"),
++        "missing live session: {started}"
++    );
++    let finished = harness.function_call_stdout("argv-stdin").await;
++    assert!(
++        finished.contains("ARGV_RECEIVED:literal-input"),
++        "stdin did not reach the child: {finished}"
++    );
++    assert!(
++        finished.contains("Process exited with code 0"),
++        "session did not complete: {finished}"
++    );
++    Ok(())
++}
+diff --git a/codex-rs/shell-command/src/shell_detect.rs b/codex-rs/shell-command/src/shell_detect.rs
+index c74532cee..798e08791 100644
+--- a/codex-rs/shell-command/src/shell_detect.rs
++++ b/codex-rs/shell-command/src/shell_detect.rs
+@@ -226,10 +226,26 @@ fn get_zsh_shell() -> Option<DetectedShell> {
+     })
+ }
+ 
++#[cfg(not(windows))]
+ const BASH_FALLBACK_PATHS: &[&str] = &["/bin/bash", "/usr/bin/bash"];
++#[cfg(windows)]
++const BASH_FALLBACK_PATHS: &[&str] = &[
++    r"C:\Program Files\Git\bin\bash.exe",
++    r"C:\Program Files\Git\usr\bin\bash.exe",
++];
+ 
+ fn get_bash_shell() -> Option<DetectedShell> {
+     let shell_path = get_shell_path(ShellType::Bash, "bash", BASH_FALLBACK_PATHS);
++    // A trusted PATH entry for Git can locate a non-default Git for Windows
++    // installation without accepting an executable path supplied by the model.
++    #[cfg(windows)]
++    let shell_path = shell_path.or_else(|| {
++        let git = which::which("git").ok()?;
++        let root = git.parent()?.parent()?;
++        [root.join("bin/bash.exe"), root.join("usr/bin/bash.exe")]
++            .into_iter()
++            .find_map(|path| file_exists(&path))
++    });
+ 
+     shell_path.map(|shell_path| DetectedShell {
+         shell_type: ShellType::Bash,
