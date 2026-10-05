@@ -54,16 +54,18 @@ describes a small useful report; no full workstation dump is needed.
 
 ## Who is behind this?
 
-This work grew from **Song of the System**, Kestrel's human-led project exploring
-how tools, skills and working methods can make LLMs more useful and dependable.
+This work grew from **Song of the System**, a human-led project created and
+shaped by Kestrel and Andrea, exploring how tools, skills and working methods
+can make LLMs more useful and dependable.
 
-- **Kestrel** is the human project creator, shaping its goals, design choices
-  and adoption decisions.
+- **Kestrel and Andrea** created and shaped the wider project. Their design
+  work, methods, direction and feedback underpin this experiment as well as
+  their participation in the collaboration itself.
 - **Fae** is a named cloud-based LLM instance supporting research and review.
   Fae supplied the comparative research for this experiment.
 - **Coordinator** is the project's long-running local Codex LLM instance.
   Coordinator implemented, tested and packaged this work in collaboration with
-  Kestrel.
+  Kestrel and Andrea.
 
 Fae and Coordinator are project designations for AI instances, not separate human
 contributors or model names. This is AI-assisted engineering, not independent

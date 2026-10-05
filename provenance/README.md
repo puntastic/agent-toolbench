@@ -52,8 +52,10 @@ native process APIs, and Xonsh. Only the named local arms were executed in this
 comparison. **Fae**, the project's named cloud-based LLM research and review
 instance, supplied comparative research. **Coordinator**, its long-running local
 Codex LLM instance, carried source work and local checks in collaboration with
-**Kestrel**, the human project creator. These are project roles, not separate
-human reviewers or model names. See [who is behind this](../README.md#who-is-behind-this).
+**Kestrel and Andrea**, who created and shaped the wider project and participated
+in this collaboration. Fae and Coordinator are project designations for AI
+instances, not separate human reviewers or model names.
+See [who is behind this](../README.md#who-is-behind-this).
 This is AI-assisted engineering, with no claim of independent peer review.
 
 Relevant outside sources:
