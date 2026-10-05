@@ -49,9 +49,12 @@ it is separate from the earlier debug candidate comparison and native test runs.
 
 Research into interface choices included PowerShell, Git Bash, WSL, Nushell,
 native process APIs, and Xonsh. Only the named local arms were executed in this
-comparison. Fae supplied comparative research; Coordinator carried source work
-and local checks in collaboration with the project owner. This is AI-assisted
-engineering, with no claim of independent peer review.
+comparison. **Fae**, the project's named cloud-based LLM research and review
+instance, supplied comparative research. **Coordinator**, its long-running local
+Codex LLM instance, carried source work and local checks in collaboration with
+**Kestrel**, the human project creator. These are project roles, not separate
+human reviewers or model names. See [who is behind this](../README.md#who-is-behind-this).
+This is AI-assisted engineering, with no claim of independent peer review.
 
 Relevant outside sources:
 

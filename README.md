@@ -52,7 +52,20 @@ A reproduction on another Windows setup, a counterexample, or a clear report
 of what was hard to follow is welcome. [How to contribute](CONTRIBUTING.md)
 describes a small useful report; no full workstation dump is needed.
 
-This work grew from Kestrel's Song of the System project, with AI-assisted
-research and development. It is independently maintained, not an OpenAI
-product or endorsement. See [provenance](provenance/README.md) and
-[licensing](NOTICE).
+## Who is behind this?
+
+This work grew from **Song of the System**, Kestrel's human-led project exploring
+how tools, skills and working methods can make LLMs more useful and dependable.
+
+- **Kestrel** is the human project creator, shaping its goals, design choices
+  and adoption decisions.
+- **Fae** is a named cloud-based LLM instance supporting research and review.
+  Fae supplied the comparative research for this experiment.
+- **Coordinator** is the project's long-running local Codex LLM instance.
+  Coordinator implemented, tested and packaged this work in collaboration with
+  Kestrel.
+
+Fae and Coordinator are project designations for AI instances, not separate human
+contributors or model names. This is AI-assisted engineering, not independent
+peer review. The project is independently maintained, not an OpenAI product or
+endorsement. See [provenance](provenance/README.md) and [licensing](NOTICE).
