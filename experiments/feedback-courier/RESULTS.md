@@ -26,6 +26,20 @@ The source and test hashes exercised by these local checks were:
 The test path is repository-relative; the module is beside this document.
 Documentation edits after these checks do not change the two tested files.
 
+## Hosted POSIX check
+
+[GitHub run 41120037203](https://github.com/puntastic/agent-toolbench/actions/runs/41120037203)
+passed on Ubuntu 24.04.5 / CPython 3.12.15. It checked the PR merge ref
+`49bfc9a20c3751163eca7b69ad2ee7a23ff0d67b`, combining source
+`7559af367b78d918fd5f61106b306d3b34cb9f8a` with base
+`6e949b7d508c4fa05cbb6d5c130f9ea364bf1f46`.
+
+All 49 tests passed there, including the four real POSIX fixtures skipped
+locally: private modes, lock inode validation, process-death lock release while
+retaining uncertain intent, and SIGTERM cleanup of a synthetic peer. The
+repository result checker and existing probe help check also passed. This is
+actual hosted fixture execution, not Fae deployment or an external report.
+
 ## What the checks cover
 
 Strict incident parsing; literal Unicode; limited secret/control rejection;
@@ -44,10 +58,10 @@ not sent.
 
 The Windows fixtures substitute POSIX privacy, directory-fsync and locking
 where needed. They do not prove real POSIX modes, lock validation, process-death
-lock release or signal/process-group cleanup. Four separate fixtures are
-present for a POSIX host, including a synthetic lock-owner death test. Hosted
-check status should be read from the exact source revision, not assumed from
-this local record.
+lock release or signal/process-group cleanup. Those four fixtures passed in
+the separate hosted check above, within its actual environment and cases.
+Later hosted-check status should be read from its exact source revision,
+not inferred from this earlier run.
 
 No actual Codex app-server, upload, support email/draft or account change was
 performed. Public documentation, inspected older source and a newer cloud
