@@ -16,6 +16,7 @@ yet establish.
 | Run the comparison | [Reproduce the experiment](experiments/windows-execution/README.md) |
 | Try or inspect the changes | [Patches and their boundaries](patches/README.md) |
 | Check the evidence | [Results and provenance](results/README.md) |
+| Prepare a bounded action-review complaint | [Feedback courier](experiments/feedback-courier/README.md) — preparation is the default; submission and disclosure are separate choices |
 
 ## The short version
 
